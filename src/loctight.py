@@ -45,9 +45,9 @@ def lock_workstation():
         # If all fail, print error but don't crash
         print("Warning: Could not lock screen. No supported screen locker found.")
     elif platform == "darwin":
-        subprocess.call(
-            r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-            shell=True,
+        subprocess.run(
+            ["/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession", "-suspend"],
+            check=True,
         )
     else:  # Windows
         ctypes.windll.user32.LockWorkStation()
