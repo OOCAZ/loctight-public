@@ -22,6 +22,34 @@ if sys.platform.startswith("linux"):
         sys.exit(1)
 
 
+def lock_workstation():
+    """Lock the workstation based on the current platform."""
+    if platform == "linux" or platform == "linux2":
+        # Try multiple Linux screen lockers in order of preference
+        lockers = [
+            ["loginctl", "lock-session"],
+            ["xdg-screensaver", "lock"],
+            ["gnome-screensaver-command", "--lock"],
+            ["dm-tool", "lock"],
+            ["xscreensaver-command", "-lock"],
+        ]
+        for locker in lockers:
+            try:
+                subprocess.run(locker, check=True, capture_output=True)
+                return  # Success, exit function
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                continue  # Try next locker
+        # If all fail, print error but don't crash
+        print("Warning: Could not lock screen. No supported screen locker found.")
+    elif platform == "darwin":
+        subprocess.call(
+            r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+            shell=True,
+        )
+    else:  # Windows
+        ctypes.windll.user32.LockWorkStation()
+
+
 def jiggle(x, checks):
     a = 0
     while a < x and timer_running[0]:
@@ -32,18 +60,7 @@ def jiggle(x, checks):
             b += 1
         a += 1
     if checks == 0 and timer_running[0]:
-        if platform == "linux" or platform == "linux2":
-            subprocess.call(
-                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                shell=True,
-            )
-        elif platform == "darwin":
-            subprocess.call(
-                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                shell=True,
-            )
-        else:
-            ctypes.windll.user32.LockWorkStation()
+        lock_workstation()
 
 
 paused = [False]
@@ -76,18 +93,7 @@ def countdown(variable, checks):
         update_time_label(0, 0)
         # Check the IntVar at the end, not at the start! That way user can change mind
         if checks.get() == 0:
-            if platform == "linux" or platform == "linux2":
-                subprocess.call(
-                    r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                    shell=True,
-                )
-            elif platform == "darwin":
-                subprocess.call(
-                    r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                    shell=True,
-                )
-            else:
-                ctypes.windll.user32.LockWorkStation()
+            lock_workstation()
     timer_running[0] = False
     paused[0] = False
     pause_button.config(text="Pause Timer", state=tb.DISABLED)
