@@ -34,12 +34,12 @@ def jiggle(x, checks):
     if checks == 0 and timer_running[0]:
         if platform == "linux" or platform == "linux2":
             subprocess.call(
-                "/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
                 shell=True,
             )
         elif platform == "darwin":
             subprocess.call(
-                "/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
                 shell=True,
             )
         else:
@@ -78,12 +78,12 @@ def countdown(variable, checks):
         if checks.get() == 0:
             if platform == "linux" or platform == "linux2":
                 subprocess.call(
-                    "/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+                    r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
                     shell=True,
                 )
             elif platform == "darwin":
                 subprocess.call(
-                    "/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+                    r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
                     shell=True,
                 )
             else:
@@ -230,4 +230,5 @@ cancel_button.grid(row=0, column=1, padx=10)
 timer_running = [False]
 paused = [False]
 
-window.mainloop()
+if __name__ == "__main__":
+    window.mainloop()

@@ -16,6 +16,33 @@ LOCTight was inspired by a real-world need: a professor who struggled to keep th
 - Automatically locks your workstation after the timer expires
 - Extensively tested on **Windows**
 - **macOS** and **Linux** support coming soon!
+- Comprehensive test suite with automated CI/CD
+
+---
+
+## Testing & Quality
+
+LOCTight includes a comprehensive test suite to ensure reliability:
+
+- **13+ unit tests** covering core functionality
+- **Automated CI/CD** via GitHub Actions
+- Tested on multiple platforms (Windows, Linux, macOS)
+- Tested on Python 3.9, 3.10, 3.11, and 3.12
+
+### Running Tests
+
+```bash
+# Install test dependencies
+pip install -e ".[test]"
+
+# Run tests
+pytest tests/ -v
+
+# Run tests with coverage
+pytest tests/ -v --cov=src --cov-report=term --cov-report=html
+```
+
+See [tests/README.md](tests/README.md) for more details.
 
 ---
 
