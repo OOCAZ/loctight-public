@@ -9,7 +9,10 @@ import unittest
 from unittest.mock import MagicMock, Mock, patch
 
 # Mock pyautogui to avoid X11/display requirements in CI
-sys.modules["pyautogui"] = MagicMock()
+# Create a proper mock module with the attributes we need
+mock_pyautogui = MagicMock()
+mock_pyautogui.moveRel = MagicMock()
+sys.modules["pyautogui"] = mock_pyautogui
 
 
 class TestTimerFunctions(unittest.TestCase):
@@ -204,34 +207,31 @@ class TestPlatformLocking(unittest.TestCase):
     @patch("sys.platform", "darwin")
     def test_macos_lock(self, mock_subprocess):
         """Test macOS lock command"""
-        if sys.platform == "darwin":
-            mock_subprocess(
-                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                shell=True,
-            )
+        mock_subprocess(
+            r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
+            shell=True,
+        )
 
         self.assertTrue(mock_subprocess.called)
 
     @patch("subprocess.run")
+    @patch("sys.platform", "linux")
     def test_linux_lock(self, mock_subprocess):
         """Test Linux lock command tries multiple lockers"""
-        from sys import platform
-
         # Mock successful lock on first try
         mock_subprocess.return_value = MagicMock()
 
         # Simulate lock_workstation for Linux
-        if platform == "linux" or platform == "linux2":
-            lockers = [
-                ["loginctl", "lock-session"],
-                ["xdg-screensaver", "lock"],
-            ]
-            for locker in lockers:
-                try:
-                    mock_subprocess(locker, check=True, capture_output=True)
-                    break
-                except:
-                    continue
+        lockers = [
+            ["loginctl", "lock-session"],
+            ["xdg-screensaver", "lock"],
+        ]
+        for locker in lockers:
+            try:
+                mock_subprocess(locker, check=True, capture_output=True)
+                break
+            except:
+                continue
 
         self.assertTrue(mock_subprocess.called)
 
