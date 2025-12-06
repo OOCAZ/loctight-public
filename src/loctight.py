@@ -2,7 +2,6 @@
 # Written by OOCAZ (Zac Poorman)
 # LOCTight - A simple timer to keep your computer active and open.
 
-import ctypes
 import os
 import subprocess
 import sys
@@ -10,6 +9,10 @@ import threading
 import time
 from sys import platform
 from tkinter import messagebox
+
+# Windows-specific import
+if sys.platform == "win32":
+    import ctypes
 
 import darkdetect
 import pyautogui
