@@ -105,7 +105,7 @@ def start_timer(duration):
     if not timer_running[0]:
         timer_running[0] = True
         paused[0] = False
-        pause_button.config(text="Pause Timer", state=tb.NORMAL)
+        pause_button.config(text="Pause Timer", state="normal")
         disable_buttons()
         t = threading.Thread(
             target=countdown,
@@ -118,7 +118,7 @@ def start_timer(duration):
 def cancel_timer():
     timer_running[0] = False
     paused[0] = False
-    pause_button.config(text="Pause Timer", state=tb.DISABLED)
+    pause_button.config(text="Pause Timer", state="disabled")
     enable_buttons()
     update_time_label(0, 0)
     entry.delete(0, tb.END)  # Clear the entry field when cancelling
@@ -145,21 +145,21 @@ def custom():
 
 
 def disable_buttons():
-    button1.config(state=tb.DISABLED)
-    button2.config(state=tb.DISABLED)
-    button3.config(state=tb.DISABLED)
+    button1.config(state="disabled")
+    button2.config(state="disabled")
+    button3.config(state="disabled")
     # Remove start_button if not present
-    cancel_button.config(state=tb.NORMAL)
-    pause_button.config(state=tb.NORMAL)
+    cancel_button.config(state="normal")
+    pause_button.config(state="normal")
 
 
 def enable_buttons():
-    button1.config(state=tb.NORMAL)
-    button2.config(state=tb.NORMAL)
-    button3.config(state=tb.NORMAL)
+    button1.config(state="normal")
+    button2.config(state="normal")
+    button3.config(state="normal")
     # Remove start_button if not present
-    cancel_button.config(state=tb.DISABLED)
-    pause_button.config(state=tb.DISABLED)
+    cancel_button.config(state="disabled")
+    pause_button.config(state="disabled")
 
 
 theme = "darkly" if darkdetect.isDark() else "flatly"
@@ -218,12 +218,12 @@ action_frame = tb.Frame(main_frame)
 action_frame.pack(pady=10)
 
 pause_button = tb.Button(
-    action_frame, text="Pause Timer", command=pause_timer, state=tb.DISABLED
+    action_frame, text="Pause Timer", command=pause_timer, state="disabled"
 )
 pause_button.grid(row=0, column=0, padx=10)
 
 cancel_button = tb.Button(
-    action_frame, text="Cancel Timer", command=cancel_timer, state=tb.DISABLED
+    action_frame, text="Cancel Timer", command=cancel_timer, state="disabled"
 )
 cancel_button.grid(row=0, column=1, padx=10)
 
