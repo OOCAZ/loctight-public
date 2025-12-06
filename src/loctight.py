@@ -2,19 +2,19 @@
 # Written by OOCAZ (Zac Poorman)
 # LOCTight - A simple timer to keep your computer active and open.
 
-import time
-import subprocess
 import ctypes
+import os
+import subprocess
+import sys
 import threading
-import pyautogui
+import time
 from sys import platform
+from tkinter import messagebox
+
+import darkdetect
+import pyautogui
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
-from tkinter import messagebox
-import darkdetect
-import os
-import sys
-
 
 if sys.platform.startswith("linux"):
     if "DISPLAY" not in os.environ:
