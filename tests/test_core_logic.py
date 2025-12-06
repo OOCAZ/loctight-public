@@ -3,10 +3,17 @@ Unit tests for LOCTight core functionality
 Tests the timer and mouse jiggle functions in isolation
 """
 
+import subprocess
 import sys
 import time
 import unittest
 from unittest.mock import MagicMock, Mock, patch
+
+# Mock pyautogui to avoid X11/display requirements in CI
+# Create a proper mock module with the attributes we need
+mock_pyautogui = MagicMock()
+mock_pyautogui.moveRel = MagicMock()
+sys.modules["pyautogui"] = mock_pyautogui
 
 
 class TestTimerFunctions(unittest.TestCase):
@@ -182,41 +189,101 @@ class TestInputValidation(unittest.TestCase):
 class TestPlatformLocking(unittest.TestCase):
     """Test platform-specific lock commands"""
 
-    @patch("ctypes.windll.user32.LockWorkStation")
     @patch("sys.platform", "win32")
-    def test_windows_lock(self, mock_lock):
+    @patch("src.loctight.platform", "win32")
+    def test_windows_lock(self):
         """Test Windows lock workstation call"""
-        import ctypes
+        # Mock ctypes module
+        mock_ctypes = MagicMock()
+        with patch.dict("sys.modules", {"ctypes": mock_ctypes}):
+            # Import after mocking to ensure ctypes is available
+            import importlib
 
-        # Simulate Windows lock
-        if sys.platform == "win32":
-            mock_lock()
+            import src.loctight
 
-        mock_lock.assert_called_once()
+            # Inject the mock into the module
+            src.loctight.ctypes = mock_ctypes
 
-    @patch("subprocess.call")
-    @patch("sys.platform", "darwin")
+            from src.loctight import lock_workstation
+
+            lock_workstation()
+            mock_ctypes.windll.user32.LockWorkStation.assert_called_once()
+
+    @patch("src.loctight.subprocess.run")
+    @patch("src.loctight.platform", "darwin")
     def test_macos_lock(self, mock_subprocess):
         """Test macOS lock command"""
-        if sys.platform == "darwin":
-            mock_subprocess(
-                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                shell=True,
-            )
+        from src.loctight import lock_workstation
 
-        self.assertTrue(mock_subprocess.called)
+        lock_workstation()
 
-    @patch("subprocess.call")
-    @patch("sys.platform", "linux")
-    def test_linux_lock(self, mock_subprocess):
-        """Test Linux lock command"""
-        if sys.platform.startswith("linux"):
-            mock_subprocess(
-                r"/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend",
-                shell=True,
-            )
+        mock_subprocess.assert_called_once_with(
+            [
+                "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession",
+                "-suspend",
+            ],
+            check=True,
+        )
 
-        self.assertTrue(mock_subprocess.called)
+    @patch("src.loctight.subprocess.run")
+    @patch("src.loctight.platform", "linux")
+    def test_linux_lock_first_locker_succeeds(self, mock_subprocess):
+        """Test Linux lock succeeds on first locker"""
+        from src.loctight import lock_workstation
+
+        # Mock successful lock on first try
+        mock_subprocess.return_value = MagicMock()
+
+        lock_workstation()
+
+        # Should only call the first locker
+        mock_subprocess.assert_called_once_with(
+            ["loginctl", "lock-session"], check=True, capture_output=True
+        )
+
+    @patch("src.loctight.subprocess.run")
+    @patch("src.loctight.platform", "linux")
+    def test_linux_lock_fallback_mechanism(self, mock_subprocess):
+        """Test Linux lock tries multiple lockers on failure"""
+        from src.loctight import lock_workstation
+
+        # First two lockers fail, third succeeds
+        mock_subprocess.side_effect = [
+            FileNotFoundError(),  # loginctl not found
+            subprocess.CalledProcessError(1, "xdg-screensaver"),  # xdg fails
+            MagicMock(),  # gnome-screensaver succeeds
+        ]
+
+        lock_workstation()
+
+        # Should have tried three lockers
+        self.assertEqual(mock_subprocess.call_count, 3)
+        calls = mock_subprocess.call_args_list
+        self.assertEqual(calls[0][0][0], ["loginctl", "lock-session"])  # First attempt
+        self.assertEqual(calls[1][0][0], ["xdg-screensaver", "lock"])  # Second attempt
+        self.assertEqual(
+            calls[2][0][0], ["gnome-screensaver-command", "--lock"]
+        )  # Third attempt
+
+    @patch("src.loctight.subprocess.run")
+    @patch("src.loctight.platform", "linux")
+    @patch("src.loctight.messagebox.showwarning")
+    def test_linux_lock_all_fail(self, mock_messagebox, mock_subprocess):
+        """Test Linux lock handles all lockers failing gracefully"""
+        from src.loctight import lock_workstation
+
+        # All lockers fail
+        mock_subprocess.side_effect = FileNotFoundError()
+
+        lock_workstation()
+
+        # Should have tried all 5 lockers
+        self.assertEqual(mock_subprocess.call_count, 5)
+        # Should show warning messagebox
+        mock_messagebox.assert_called_once_with(
+            "Screen Lock Failed",
+            "Could not lock screen. No supported screen locker found.",
+        )
 
 
 class TestButtonStateManagement(unittest.TestCase):
