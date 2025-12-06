@@ -190,14 +190,24 @@ class TestPlatformLocking(unittest.TestCase):
     """Test platform-specific lock commands"""
 
     @patch("sys.platform", "win32")
-    @patch("src.loctight.ctypes")
     @patch("src.loctight.platform", "win32")
-    def test_windows_lock(self, mock_ctypes):
+    def test_windows_lock(self):
         """Test Windows lock workstation call"""
-        from src.loctight import lock_workstation
+        # Mock ctypes module
+        mock_ctypes = MagicMock()
+        with patch.dict("sys.modules", {"ctypes": mock_ctypes}):
+            # Import after mocking to ensure ctypes is available
+            import importlib
 
-        lock_workstation()
-        mock_ctypes.windll.user32.LockWorkStation.assert_called_once()
+            import src.loctight
+
+            # Inject the mock into the module
+            src.loctight.ctypes = mock_ctypes
+
+            from src.loctight import lock_workstation
+
+            lock_workstation()
+            mock_ctypes.windll.user32.LockWorkStation.assert_called_once()
 
     @patch("src.loctight.subprocess.run")
     @patch("src.loctight.platform", "darwin")
