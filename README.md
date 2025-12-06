@@ -1,5 +1,9 @@
 # LOCTight
 
+![Tests](https://github.com/OOCAZ/loctight-public/actions/workflows/tests.yml/badge.svg)
+![Lint](https://github.com/OOCAZ/loctight-public/actions/workflows/lint.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A simple, open-source program to keep your PC active and open for a specified amount of time, then automatically lock your computer.
 
 ---
