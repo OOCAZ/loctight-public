@@ -46,7 +46,10 @@ def lock_workstation():
         print("Warning: Could not lock screen. No supported screen locker found.")
     elif platform == "darwin":
         subprocess.run(
-            ["/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession", "-suspend"],
+            [
+                "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession",
+                "-suspend",
+            ],
             check=True,
         )
     else:  # Windows
