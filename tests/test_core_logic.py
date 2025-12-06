@@ -267,8 +267,8 @@ class TestPlatformLocking(unittest.TestCase):
 
     @patch("src.loctight.subprocess.run")
     @patch("src.loctight.platform", "linux")
-    @patch("builtins.print")
-    def test_linux_lock_all_fail(self, mock_print, mock_subprocess):
+    @patch("src.loctight.messagebox.showwarning")
+    def test_linux_lock_all_fail(self, mock_messagebox, mock_subprocess):
         """Test Linux lock handles all lockers failing gracefully"""
         from src.loctight import lock_workstation
 
@@ -279,9 +279,10 @@ class TestPlatformLocking(unittest.TestCase):
 
         # Should have tried all 5 lockers
         self.assertEqual(mock_subprocess.call_count, 5)
-        # Should print warning message
-        mock_print.assert_called_once_with(
-            "Warning: Could not lock screen. No supported screen locker found."
+        # Should show warning messagebox
+        mock_messagebox.assert_called_once_with(
+            "Screen Lock Failed",
+            "Could not lock screen. No supported screen locker found.",
         )
 
 

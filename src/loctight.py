@@ -42,8 +42,11 @@ def lock_workstation():
                 return  # Success, exit function
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue  # Try next locker
-        # If all fail, print error but don't crash
-        print("Warning: Could not lock screen. No supported screen locker found.")
+        # If all fail, show warning but don't crash
+        messagebox.showwarning(
+            "Screen Lock Failed",
+            "Could not lock screen. No supported screen locker found.",
+        )
     elif platform == "darwin":
         subprocess.run(
             [
