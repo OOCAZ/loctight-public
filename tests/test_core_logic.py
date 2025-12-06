@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import MagicMock, Mock, patch
 
 # Mock pyautogui to avoid X11/display requirements in CI
-sys.modules['pyautogui'] = MagicMock()
+sys.modules["pyautogui"] = MagicMock()
 
 
 class TestTimerFunctions(unittest.TestCase):
@@ -189,11 +189,12 @@ class TestPlatformLocking(unittest.TestCase):
     def test_windows_lock(self, mock_subprocess):
         """Test Windows lock workstation call"""
         # Create a mock for ctypes on Windows
-        with patch.dict('sys.modules', {'ctypes': MagicMock()}):
+        with patch.dict("sys.modules", {"ctypes": MagicMock()}):
             import ctypes
+
             mock_windll = MagicMock()
             ctypes.windll = mock_windll
-            
+
             # Test the lock function
             if sys.platform == "win32":
                 ctypes.windll.user32.LockWorkStation()
@@ -215,10 +216,10 @@ class TestPlatformLocking(unittest.TestCase):
     def test_linux_lock(self, mock_subprocess):
         """Test Linux lock command tries multiple lockers"""
         from sys import platform
-        
+
         # Mock successful lock on first try
         mock_subprocess.return_value = MagicMock()
-        
+
         # Simulate lock_workstation for Linux
         if platform == "linux" or platform == "linux2":
             lockers = [
@@ -231,7 +232,7 @@ class TestPlatformLocking(unittest.TestCase):
                     break
                 except:
                     continue
-        
+
         self.assertTrue(mock_subprocess.called)
 
 
