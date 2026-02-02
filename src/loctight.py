@@ -103,7 +103,7 @@ def countdown(variable, checks):
         # Check the IntVar at the end, not at the start! That way user can change mind
         if checks.get() == 0:
             lock_workstation()
-    
+
     # Reset state and GUI on the main thread to ensure it works even after computer lock
     timer_running[0] = False
     paused[0] = False
