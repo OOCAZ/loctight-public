@@ -103,17 +103,19 @@ def countdown(variable, checks):
         # Check the IntVar at the end, not at the start! That way user can change mind
         if checks.get() == 0:
             lock_workstation()
+    
+    # Reset state and GUI on the main thread to ensure it works even after computer lock
     timer_running[0] = False
     paused[0] = False
-    pause_button.config(text="Pause Timer", state=tb.DISABLED)
-    enable_buttons()
+    window.after(0, lambda: pause_button.config(text="Pause Timer", state=DISABLED))
+    window.after(0, enable_buttons)
 
 
 def update_time_label(m, s):
     # Only update if timer is running or resetting to 00:00
     if timer_running[0] or (m == 0 and s == 0):
         time_str = f"Time Left: {m:02}:{s:02}"
-        label3.config(text=time_str)
+        window.after(0, lambda: label3.config(text=time_str))
 
 
 def start_timer(duration):
@@ -136,7 +138,7 @@ def cancel_timer():
     pause_button.config(text="Pause Timer", state="disabled")
     enable_buttons()
     update_time_label(0, 0)
-    entry.delete(0, tb.END)  # Clear the entry field when cancelling
+    entry.delete(0, END)  # Clear the entry field when cancelling
 
 
 def short():
@@ -210,7 +212,7 @@ custom_frame.pack(pady=10)
 
 entry = tb.Entry(custom_frame, width=10)
 entry.grid(row=0, column=0, padx=(0, 10))
-button3 = tb.Button(custom_frame, text="Custom (min)", command=custom)
+button3 = tb.Button(custom_frame, text="Custom Timer Start (min)", command=custom)
 button3.grid(row=0, column=1)
 
 checks = tb.IntVar(value=0)
